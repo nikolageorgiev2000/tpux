@@ -121,7 +121,6 @@ def get_priv_ipv4_addr(*, interface_prefix: str = 'ens') -> IPv4Address:
                     return IPv4Address(addr.address)
     raise RuntimeError('Cannot detect the private IPv4 address.')
 
-ssh_config_file = os.path.expanduser('~/.ssh/config')
 block_start = '# BEGIN tpux configuration'
 block_end = '# END tpux configuration'
 block_pattern = re.compile(r'\n*' + re.escape(block_start) + r'.*?' + re.escape(block_end) + r'\n*', re.DOTALL)
@@ -136,69 +135,6 @@ def clear_config_with_block(config_file: str, *, newline_format: str = '\n') -> 
 
     with open(config_file, 'w') as f:
         f.write(new_content)
-
-def insert_ssh_config(ip_host_others: List[IPv4Address]) -> None:
-    os.makedirs(os.path.expanduser('~/.ssh'), exist_ok=True)
-    ips_str = '127.0.0.1 ' + ' '.join(str(ip) for ip in ip_host_others)
-    config = f'''{block_start}
-Host {ips_str}
-    StrictHostKeyChecking no
-    UserKnownHostsFile /dev/null
-    LogLevel ERROR
-    IdentityFile ~/.ssh/id_ed25519_tpux
-{block_end}
-'''
-
-    if not os.path.exists(ssh_config_file):
-        with open(ssh_config_file, 'w') as f:
-            pass
-        os.chmod(ssh_config_file, 0o600)
-        content = ''
-    else:
-        content = Path(ssh_config_file).read_text().rstrip()
-
-    if not block_pattern.search(content):
-        if not content:
-            new_content = f'{content}{config}'
-        else:
-            new_content = f'{content}\n\n{config}'
-    else:
-        new_content = block_pattern.sub(config, content)
-
-    with open(ssh_config_file, 'w') as f:
-        f.write(new_content)
-
-def clear_ssh_config() -> None:
-    clear_config_with_block(ssh_config_file)
-
-public_key_path = os.path.expanduser('~/.ssh/id_ed25519_tpux.pub')
-private_key_path = os.path.expanduser('~/.ssh/id_ed25519_tpux')
-authorized_key_path = os.path.expanduser('~/.ssh/authorized_keys')
-
-def generate_ssh_key() -> None:
-    command = ['ssh-keygen', '-t', 'ed25519', '-f', private_key_path, '-N', '']
-    subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
-
-    public_key = Path(public_key_path).read_text().strip()
-
-    print(f'''Generated public key for tpux:
-{public_key}
-{YELLOW_START}Please open https://console.cloud.google.com/compute/metadata?resourceTab=sshkeys add this public key. This key will be automatically propagated to all hosts.{COLOR_RESET}''')
-    input('Please press enter to continue...')
-
-    while True:
-        authorized_key_file = Path(authorized_key_path)
-        authorized_key_data = '' if not authorized_key_file.exists() else authorized_key_file.read_text()
-        if public_key in authorized_key_data:
-            break
-        input('The key has not been propagated to host machines. Please wait for a while, and then press enter to continue...')
-
-def clear_ssh_key() -> None:
-    public_key_file = Path(public_key_path)
-    public_key_file.unlink(missing_ok=True)
-
-    private_key_file = Path(private_key_path)
-    private_key_file.unlink(missing_ok=True)
 
 def write_podips_config(ip_host_others: List[IPv4Address]) -> None:
     podips_config_file = get_podips_config_file()
@@ -268,7 +204,6 @@ def config_podips() -> None:
 4. Do NOT include the IP address of the current host: {ip_host0}{COLOR_RESET}
 '''
     ip_host_others = input_priv_ipv4_addrs('Input the private (internal) IPv4 address of the other hosts, comma separated', note, arg_value=args.priv_ipv4_addrs)
-    insert_ssh_config(ip_host_others=ip_host_others)
     write_podips_config(ip_host_others=ip_host_others)  # TODO: do we need to add host0 ip here?
 
 def install_nfs_on_hosts() -> None:
@@ -377,7 +312,6 @@ def setup_tpu_pod() -> None:
     check_tpu_chip_exists()
 
     config_podips()
-    generate_ssh_key()
 
     # update_apt_on_hosts() # too slow and unnecessary
     install_packages_on_hosts()
@@ -392,8 +326,6 @@ def clear_setup_single_host() -> None:
     clear_path_to_env()
 
 def clear_setup_tpu_pod() -> None:
-    clear_ssh_config()
-    clear_ssh_key()
     clear_exports_config()
     clear_path_to_env()
 
