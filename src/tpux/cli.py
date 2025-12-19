@@ -366,7 +366,7 @@ def setup_single_host() -> None:
     check_is_not_root()
     check_tpu_chip_exists()
 
-    update_apt()
+    # update_apt() # too slow and unnecessary
     install_packages()
     install_oh_my_zsh()
 
@@ -379,7 +379,7 @@ def setup_tpu_pod() -> None:
     config_podips()
     generate_ssh_key()
 
-    update_apt_on_hosts()
+    # update_apt_on_hosts() # too slow and unnecessary
     install_packages_on_hosts()
     install_oh_my_zsh_on_hosts()
     install_nfs_on_hosts()
