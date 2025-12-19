@@ -8,17 +8,17 @@ where = ["src"]
 [project]
 name = "tpux"
 authors = [
-  { name="Shin", email="shin@yixiaoer.sg" },
+  { name="nikolageorgiev2000", email="nikola.georgiev2000@hotmail.com" },
 ]
 # we cannot use `dynamic` here, because it doesn't work on Python 3.8
-version = "0.1.6"
+version = "0.1.0"
 dependencies = [
   "psutil",
   "fabric",
 ]
 description = "A set of Python scripts that makes your experience on TPU better"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     'License :: OSI Approved :: MIT License',
@@ -27,8 +27,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yixiaoer/tpux"
-Issues = "https://github.com/yixiaoer/tpux/issues"
+Homepage = "https://github.com/nikolageorgiev2000/tpux"
+Issues = "https://github.com/nikolageorgiev2000/tpux/issues"
 
 [project.scripts]
 tpux = "tpux.cli:main"
