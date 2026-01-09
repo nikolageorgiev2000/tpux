@@ -162,7 +162,7 @@ update_apt_commands = [
 ]
 
 install_packages_commands = [
-    'sudo apt-get install -y -qq golang neofetch zsh byobu',
+    # 'sudo apt-get install -y -qq golang neofetch zsh byobu',
     'sudo apt-get install -y -qq software-properties-common',
     'sudo add-apt-repository -y ppa:deadsnakes/ppa',
     'sudo apt-get install -y -qq python3.12-full python3.12-dev',
